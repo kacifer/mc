@@ -1,28 +1,19 @@
 package mc
 
+import "github.com/surfinggo/mc"
+
 func SliceContains[V comparable](slice []V, v V) bool {
-	for _, s := range slice {
-		if s == v {
-			return true
-		}
-	}
-	return false
+	return mc.SliceContains(slice, v)
 }
 
-// PointerTo creates a pointer to bool
 func PointerTo[V any](v V) *V {
-	return &v
+	return mc.PointerTo(v)
 }
 
 func PtrTo[V any](v V) *V {
-	return PointerTo(v)
+	return mc.PointerTo(v)
 }
 
-// VarOr returns the default value if the value is empty
 func VarOr[V comparable](v V, defaultValue V) V {
-	zero := new(V)
-	if v == *zero {
-		return defaultValue
-	}
-	return v
+	return mc.VarOr(v, defaultValue)
 }
