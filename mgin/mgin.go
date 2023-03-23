@@ -96,9 +96,13 @@ func Default() *Engine {
 	return &Engine{gin.Default()}
 }
 
-var SkipAuthPaths = []string{"/healthz", "/api/v1/healthz", "/api/v1/auth/login"}
-
 var HealthCheckPaths = []string{"/healthz", "/api/v1/healthz"}
+
+const AuthLoginPath = "/api/v1/auth/login"
+const AuthRefreshPath = "/api/v1/auth/refresh"
+const AuthUserPath = "/api/v1/auth/user"
+const SettingGetPath = "/api/v1/settings"
+const SettingSetPath = "/api/v1/settings"
 
 type CustomAuthConfig struct {
 	Jwt           mjwt.Engine
@@ -121,9 +125,10 @@ func Custom(config CustomConfig) *Engine {
 	if config.Auth != nil {
 		if config.Auth.Jwt != nil {
 			skipAuthPaths := config.Auth.SkipAuthPaths
-			if skipAuthPaths == nil {
-				skipAuthPaths = SkipAuthPaths
+			for _, path := range HealthCheckPaths {
+				skipAuthPaths = append(skipAuthPaths, path)
 			}
+			skipAuthPaths = append(skipAuthPaths, AuthLoginPath)
 			middlewares = append(middlewares, CreateAuthMiddleware(config.Auth.Jwt, skipAuthPaths))
 		}
 	}
@@ -142,14 +147,14 @@ func Custom(config CustomConfig) *Engine {
 
 	if config.Auth != nil {
 		if config.Auth.Jwt != nil && config.Auth.UserStore != nil {
-			engine.POST("/api/v1/auth/login", CreateAuthLoginHandler(config.Auth.Jwt, config.Auth.UserStore))
-			engine.GET("/api/v1/auth/refresh", CreateAuthRefreshHandler(config.Auth.Jwt))
-			engine.GET("/api/v1/auth/user", CreateAuthUserHandler(config.Auth.UserStore))
+			engine.POST(AuthLoginPath, CreateAuthLoginHandler(config.Auth.Jwt, config.Auth.UserStore))
+			engine.GET(AuthRefreshPath, CreateAuthRefreshHandler(config.Auth.Jwt))
+			engine.GET(AuthUserPath, CreateAuthUserHandler(config.Auth.UserStore))
 		}
 
 		if config.Auth.SettingStore != nil {
-			engine.GET("/api/v1/settings", CreateAuthSettingGetHandler(config.Auth.SettingStore))
-			engine.PUT("/api/v1/settings", CreateAuthSettingSetHandler(config.Auth.SettingStore))
+			engine.GET(SettingGetPath, CreateAuthSettingGetHandler(config.Auth.SettingStore))
+			engine.PUT(SettingSetPath, CreateAuthSettingSetHandler(config.Auth.SettingStore))
 		}
 	}
 

@@ -4,6 +4,7 @@ import (
 	"github.com/notpm/mc/mjwt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 )
 
 func CreateAuthLoginHandler(jwt mjwt.Engine, userStore UserStore) HandlerFunc {
@@ -20,25 +21,25 @@ func CreateAuthLoginHandler(jwt mjwt.Engine, userStore UserStore) HandlerFunc {
 		user, err := userStore.FindByUsername(data.Username)
 		if err != nil {
 			if err == ErrUsernameNotFound {
-				c.AbortAndWriteInvalidInputError(map[string]any{
+				c.AbortAndWriteInvalidInputDetails(map[string]any{
 					"username": "username not exist",
 				})
 				return
 			}
-			c.AbortWithInternalError(500, errors.Wrap(err, "find user by username error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "find user by username error"))
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.GetPassword()), []byte(data.Password))
 		if err != nil {
-			c.AbortAndWriteInvalidInputError(map[string]any{
+			c.AbortAndWriteInvalidInputDetails(map[string]any{
 				"password": "password not match",
 			})
 			return
 		}
 		tokenString, err := jwt.SignedStringForID(user.GetID())
 		if err != nil {
-			c.AbortWithInternalError(500, errors.Wrap(err, "sign error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "sign error"))
 			return
 		}
 		c.Header("Authorization", tokenString)
@@ -52,7 +53,7 @@ func CreateAuthRefreshHandler(jwt mjwt.Engine) HandlerFunc {
 
 		tokenString, err := jwt.SignedStringForID(userID)
 		if err != nil {
-			c.AbortWithInternalError(500, errors.Wrap(err, "sign error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "sign error"))
 			return
 		}
 		c.Header("Authorization", tokenString)
@@ -67,12 +68,12 @@ func CreateAuthUserHandler(userStore UserStore) HandlerFunc {
 		user, err := userStore.Find(id)
 		if err != nil {
 			if err == ErrUserIDNotFound {
-				c.AbortAndWriteInvalidInputError(map[string]any{
+				c.AbortAndWriteInvalidInputDetails(map[string]any{
 					"id": "user not found",
 				})
 				return
 			}
-			c.AbortWithInternalError(500, errors.Wrap(err, "find user error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "find user error"))
 			return
 		}
 		c.JSON(200, user)
@@ -85,7 +86,7 @@ func CreateAuthSettingGetHandler(settingStore SettingStore) HandlerFunc {
 
 		setting, err := settingStore.Get(id, c.Query("key"))
 		if err != nil {
-			c.AbortWithInternalError(500, errors.Wrap(err, "get setting error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "get setting error"))
 			return
 		}
 
@@ -106,7 +107,7 @@ func CreateAuthSettingSetHandler(settingStore SettingStore) HandlerFunc {
 		id := c.MustIDContext()
 
 		if err := settingStore.Set(id, c.Query("key"), data.Value); err != nil {
-			c.AbortWithInternalError(500, errors.Wrap(err, "get setting error"))
+			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "get setting error"))
 			return
 		}
 

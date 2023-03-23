@@ -14,7 +14,6 @@ var ErrUsernameNotFound = errors.New("username not found")
 type UserStore interface {
 	Find(userID uint) (User, error)
 	FindByUsername(username string) (User, error)
-	Save(user User) error
 }
 
 type SettingStore interface {

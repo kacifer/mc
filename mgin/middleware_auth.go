@@ -3,6 +3,7 @@ package mgin
 import (
 	"github.com/notpm/mc/mjwt"
 	"github.com/surfinggo/mc"
+	"net/http"
 )
 
 func CreateAuthMiddleware(jwt mjwt.Engine, skipAuthPaths []string) HandlerFunc {
@@ -10,8 +11,8 @@ func CreateAuthMiddleware(jwt mjwt.Engine, skipAuthPaths []string) HandlerFunc {
 		if !mc.SliceContains(skipAuthPaths, c.Request.URL.Path) {
 			_, claims, err := jwt.ValidateHeader(c.Request.Header.Get("Authorization"))
 			if err != nil {
-				c.AbortWithStatusJSON(401, &E{
-					Code:    401,
+				c.AbortWithStatusJSON(http.StatusUnauthorized, &E{
+					Code:    http.StatusUnauthorized,
 					Message: err.Error(),
 				})
 				return

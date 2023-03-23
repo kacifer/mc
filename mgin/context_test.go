@@ -102,11 +102,11 @@ func TestContext_AbortAndWriteError(t *testing.T) {
 	assertions.Equal(string(expected), string(body))
 }
 
-func TestContext_AbortWithInternalError(t *testing.T) {
+func TestContext_AbortAndWriteInternalError(t *testing.T) {
 	assertions := require.New(t)
 	{
 		recorder, c, _ := CreateTestContext()
-		c.AbortWithInternalError(http.StatusInternalServerError, errors.New("database query error"))
+		c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.New("database query error"))
 		assertions.Equal(http.StatusInternalServerError, c.Writer.Status())
 		body, err := io.ReadAll(recorder.Result().Body)
 		assertions.Nil(err)
@@ -120,7 +120,7 @@ func TestContext_AbortWithInternalError(t *testing.T) {
 	{
 		recorder, c, _ := CreateTestContext()
 		gin.SetMode(gin.DebugMode)
-		c.AbortWithInternalError(http.StatusInternalServerError, errors.New("database query error"))
+		c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.New("database query error"))
 		assertions.Equal(http.StatusInternalServerError, c.Writer.Status())
 		body, err := io.ReadAll(recorder.Result().Body)
 		assertions.Nil(err)
@@ -136,7 +136,7 @@ func TestContext_AbortWithInternalError(t *testing.T) {
 func TestContext_AbortAndWriteInvalidInputError(t *testing.T) {
 	assertions := require.New(t)
 	recorder, c, _ := CreateTestContext()
-	c.AbortAndWriteInvalidInputError(map[string]any{
+	c.AbortAndWriteInvalidInputDetails(map[string]any{
 		"username": "username is required",
 	})
 	assertions.Equal(http.StatusUnprocessableEntity, c.Writer.Status())

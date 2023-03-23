@@ -70,6 +70,7 @@ func (c *Context) IDParam() uint {
 	return c.UintParam(IDParam)
 }
 
+// AbortAndWriteError aborts the context and write standard error response
 func (c *Context) AbortAndWriteError(code int, err any) {
 	switch err.(type) {
 	case *E:
@@ -92,27 +93,29 @@ func (c *Context) AbortAndWriteError(code int, err any) {
 	}
 }
 
-func (c *Context) AbortWithInternalError(code int, err error) {
+// AbortAndWriteInternalError aborts the context, push error to error stack and write standard error response,
+// if gin.IsDebugging() is false, it also hides the error message.
+func (c *Context) AbortAndWriteInternalError(code int, err error) {
 	_ = c.Error(err)
 	if gin.IsDebugging() {
-		c.AbortWithStatusJSON(code, &E{
-			Code:    code,
-			Message: err.Error(),
-		})
+		c.AbortAndWriteError(code, err)
 		return
 	} else {
 		// hide error message if not debugging
-		c.AbortWithStatusJSON(code, &E{
-			Code:    code,
-			Message: "server error",
-		})
+		c.AbortAndWriteError(code, "server error")
 	}
 }
 
-func (c *Context) AbortAndWriteInvalidInputError(fields map[string]any) {
+// AbortAndWriteInvalidInputMessage aborts the context and write standard error response with invalid input message
+func (c *Context) AbortAndWriteInvalidInputMessage(message string) {
+	c.AbortAndWriteError(http.StatusUnprocessableEntity, message)
+}
+
+// AbortAndWriteInvalidInputDetails aborts the context and write standard error response with invalid input details
+func (c *Context) AbortAndWriteInvalidInputDetails(details map[string]any) {
 	message := "invalid input"
-	if len(fields) == 1 {
-		for _, v := range fields {
+	if len(details) > 0 {
+		for _, v := range details {
 			message = fmt.Sprintf("%v", v)
 			break
 		}
@@ -120,7 +123,7 @@ func (c *Context) AbortAndWriteInvalidInputError(fields map[string]any) {
 	c.AbortAndWriteError(http.StatusUnprocessableEntity, &E{
 		Code:    http.StatusUnprocessableEntity,
 		Message: message,
-		Details: fields,
+		Details: details,
 	})
 }
 
