@@ -109,6 +109,7 @@ type CustomAuthConfig struct {
 	SkipAuthPaths []string
 	UserStore     UserStore
 	SettingStore  SettingStore
+	KeysWhitelist []string
 }
 
 type CustomConfig struct {
@@ -155,8 +156,8 @@ func Custom(config CustomConfig) *Engine {
 		}
 
 		if config.Auth.SettingStore != nil {
-			engine.GET(SettingGetPath, CreateAuthSettingGetHandler(config.Auth.SettingStore))
-			engine.PUT(SettingSetPath, CreateAuthSettingSetHandler(config.Auth.SettingStore))
+			engine.GET(SettingGetPath, CreateAuthSettingGetHandler(config.Auth.SettingStore, config.Auth.KeysWhitelist))
+			engine.PUT(SettingSetPath, CreateAuthSettingSetHandler(config.Auth.SettingStore, config.Auth.KeysWhitelist))
 		}
 	}
 

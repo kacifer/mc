@@ -30,6 +30,10 @@ func TestMustUintContext(t *testing.T) {
 	_, c, _ := CreateTestContext()
 	c.Set(IDKey, uint(1))
 	assertions.Equal(uint(1), c.MustUintContext(IDKey))
+	c.Set(IDKey, float64(1))
+	assertions.Equal(uint(1), c.MustUintContext(IDKey))
+	c.Set(IDKey, "1")
+	assertions.Equal(uint(1), c.MustUintContext(IDKey))
 }
 
 func TestUintContext(t *testing.T) {

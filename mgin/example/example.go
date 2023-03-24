@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/notpm/mc"
 	"github.com/notpm/mc/mgin"
 	"github.com/pkg/errors"
-	"github.com/surfinggo/mc"
 	"log"
 )
 

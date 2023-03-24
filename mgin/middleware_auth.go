@@ -1,8 +1,8 @@
 package mgin
 
 import (
+	"github.com/notpm/mc"
 	"github.com/notpm/mc/mjwt"
-	"github.com/surfinggo/mc"
 	"net/http"
 )
 

@@ -1,10 +1,12 @@
 package mgin
 
 import (
+	"github.com/notpm/mc"
 	"github.com/notpm/mc/mjwt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"strings"
 )
 
 func CreateAuthLoginHandler(jwt mjwt.Engine, userStore UserStore) HandlerFunc {
@@ -80,22 +82,50 @@ func CreateAuthUserHandler(userStore UserStore) HandlerFunc {
 	}
 }
 
-func CreateAuthSettingGetHandler(settingStore SettingStore) HandlerFunc {
+func CreateAuthSettingGetHandler(settingStore SettingStore, keysWhitelist []string) HandlerFunc {
 	return func(c *Context) {
-		id := c.MustIDContext()
+		key := c.Query("key")
 
-		setting, err := settingStore.Get(id, c.Query("key"))
-		if err != nil {
-			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "get setting error"))
-			return
+		var keys []string
+		if key == "" {
+			for _, k := range strings.Split(c.Query("keys"), ",") {
+				if strings.TrimSpace(k) != "" {
+					keys = append(keys, strings.TrimSpace(k))
+				}
+			}
+		} else {
+			keys = []string{key}
 		}
 
-		c.JSON(200, setting)
+		for _, k := range keys {
+			if len(keysWhitelist) > 0 && !mc.SliceContains(keysWhitelist, k) {
+				c.AbortAndWriteInvalidInputDetails(map[string]any{
+					"key": "key not allowed",
+				})
+				return
+			}
+		}
+
+		id := c.MustIDContext()
+
+		settings := map[string]string{}
+		for _, k := range keys {
+			setting, err := settingStore.Get(id, k)
+			if err != nil {
+				c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "get setting error"))
+				return
+			}
+			settings[k] = setting
+		}
+
+		c.JSON(200, settings)
 	}
 }
 
-func CreateAuthSettingSetHandler(settingStore SettingStore) HandlerFunc {
+func CreateAuthSettingSetHandler(settingStore SettingStore, keysWhitelist []string) HandlerFunc {
 	return func(c *Context) {
+		key := c.Query("key")
+
 		type Data struct {
 			Value string `json:"value"`
 		}
@@ -104,9 +134,16 @@ func CreateAuthSettingSetHandler(settingStore SettingStore) HandlerFunc {
 			return
 		}
 
+		if len(keysWhitelist) > 0 && !mc.SliceContains(keysWhitelist, key) {
+			c.AbortAndWriteInvalidInputDetails(map[string]any{
+				"key": "key not allowed",
+			})
+			return
+		}
+
 		id := c.MustIDContext()
 
-		if err := settingStore.Set(id, c.Query("key"), data.Value); err != nil {
+		if err := settingStore.Set(id, key, data.Value); err != nil {
 			c.AbortAndWriteInternalError(http.StatusInternalServerError, errors.Wrap(err, "get setting error"))
 			return
 		}

@@ -3,8 +3,8 @@ package mgin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/notpm/mc"
 	"github.com/pkg/errors"
-	"github.com/surfinggo/mc"
 	"net/http"
 )
 
@@ -35,7 +35,35 @@ func (c *Context) MustBindJSON(obj any) (ok bool) {
 }
 
 func (c *Context) MustUintContext(key string) uint {
-	return c.MustGet(key).(uint)
+	v := c.MustGet(key)
+	switch v.(type) {
+	case int:
+		return uint(v.(int))
+	case int8:
+		return uint(v.(int8))
+	case int16:
+		return uint(v.(int16))
+	case int32:
+		return uint(v.(int32))
+	case int64:
+		return uint(v.(int64))
+	case uint:
+		return v.(uint)
+	case uint8:
+		return uint(v.(uint8))
+	case uint16:
+		return uint(v.(uint16))
+	case uint32:
+		return uint(v.(uint32))
+	case uint64:
+		return uint(v.(uint64))
+	case float32:
+		return uint(v.(float32))
+	case float64:
+		return uint(v.(float64))
+	default:
+		return mc.StringToUint(fmt.Sprintf("%v", v))
+	}
 }
 
 func (c *Context) MustIDContext() uint {
