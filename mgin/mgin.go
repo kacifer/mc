@@ -122,6 +122,13 @@ func Custom(config CustomConfig) *Engine {
 	engine := &Engine{base}
 
 	var middlewares []HandlerFunc
+	middlewares = append(middlewares, WrapHandler(gin.LoggerWithConfig(gin.LoggerConfig{
+		Output:    mlog.DefaultLogger.Out,
+		SkipPaths: HealthCheckPaths,
+	})))
+
+	middlewares = append(middlewares, WrapHandler(gin.Recovery()))
+
 	if config.Auth != nil {
 		if config.Auth.Jwt != nil {
 			skipAuthPaths := config.Auth.SkipAuthPaths
@@ -132,11 +139,6 @@ func Custom(config CustomConfig) *Engine {
 			middlewares = append(middlewares, CreateAuthMiddleware(config.Auth.Jwt, skipAuthPaths))
 		}
 	}
-	middlewares = append(middlewares, WrapHandler(gin.LoggerWithConfig(gin.LoggerConfig{
-		Output:    mlog.DefaultLogger.Out,
-		SkipPaths: HealthCheckPaths,
-	})))
-	middlewares = append(middlewares, WrapHandler(gin.Recovery()))
 
 	engine.Use(middlewares...)
 
