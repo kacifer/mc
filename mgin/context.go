@@ -106,9 +106,9 @@ func (c *Context) AbortAndWriteInternalError(code int, err error) {
 	}
 }
 
-// AbortAndWriteInvalidInputMessage aborts the context and write standard error response with invalid input message
-func (c *Context) AbortAndWriteInvalidInputMessage(message string) {
-	c.AbortAndWriteError(http.StatusUnprocessableEntity, message)
+// AbortAndWriteInvalidInputError aborts the context and write standard error response with invalid input error
+func (c *Context) AbortAndWriteInvalidInputError(e *E) {
+	c.AbortAndWriteError(http.StatusUnprocessableEntity, e)
 }
 
 // AbortAndWriteInvalidInputDetails aborts the context and write standard error response with invalid input details
