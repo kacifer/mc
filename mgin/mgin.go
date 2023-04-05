@@ -115,6 +115,11 @@ type CustomAuthConfig struct {
 type CustomConfig struct {
 	Version string
 	Auth    *CustomAuthConfig
+
+	// Because we register some routes in Custom() function,
+	// so if you register middlewares after it returns, they will not be applied to those routes.
+	// You'll need to put them in ExtraMiddlewares to make them work.
+	ExtraMiddlewares []HandlerFunc
 }
 
 func Custom(config CustomConfig) *Engine {
@@ -140,6 +145,8 @@ func Custom(config CustomConfig) *Engine {
 			middlewares = append(middlewares, CreateAuthMiddleware(config.Auth.Jwt, skipAuthPaths))
 		}
 	}
+
+	middlewares = append(middlewares, config.ExtraMiddlewares...)
 
 	engine.Use(middlewares...)
 
