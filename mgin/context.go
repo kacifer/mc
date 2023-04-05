@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/notpm/mc"
+	"github.com/notpm/mc/mlog"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -124,7 +125,7 @@ func (c *Context) AbortAndWriteError(code int, err any) {
 // AbortAndWriteInternalError aborts the context, push error to error stack and write standard error response,
 // if gin.IsDebugging() is false, it also hides the error message.
 func (c *Context) AbortAndWriteInternalError(code int, err error) {
-	_ = c.Error(err)
+	mlog.Error("request abort with code %v, error: %v", code, err)
 	if gin.IsDebugging() {
 		c.AbortAndWriteError(code, err)
 		return
@@ -132,6 +133,10 @@ func (c *Context) AbortAndWriteInternalError(code int, err error) {
 		// hide error message if not debugging
 		c.AbortAndWriteError(code, "server error")
 	}
+}
+
+func (c *Context) AbortAndWriteInternalServerError(err error) {
+	c.AbortAndWriteInternalError(http.StatusInternalServerError, err)
 }
 
 // AbortAndWriteInvalidInputError aborts the context and write standard error response with invalid input error
