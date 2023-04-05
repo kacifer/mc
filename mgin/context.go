@@ -125,7 +125,7 @@ func (c *Context) AbortAndWriteError(code int, err any) {
 // AbortAndWriteInternalError aborts the context, push error to error stack and write standard error response,
 // if gin.IsDebugging() is false, it also hides the error message.
 func (c *Context) AbortAndWriteInternalError(code int, err any) {
-	mlog.Error("request abort with code %v, error: %v", code, err)
+	mlog.Errorf("request abort with code %v, error: %v", code, err)
 	if gin.IsDebugging() {
 		c.AbortAndWriteError(code, err)
 		return
