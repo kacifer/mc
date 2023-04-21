@@ -2,8 +2,8 @@ package mgin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/notpm/mc/mjwt"
-	"github.com/notpm/mc/mlog"
+	"github.com/kacifer/mc/mjwt"
+	"github.com/kacifer/mc/mlog"
 	"net/http"
 )
 

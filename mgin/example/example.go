@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/notpm/mc"
-	"github.com/notpm/mc/mgin"
+	"github.com/kacifer/mc"
+	"github.com/kacifer/mc/mgin"
 	"github.com/pkg/errors"
 	"log"
 )

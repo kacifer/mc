@@ -3,8 +3,8 @@ package mgin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/notpm/mc"
-	"github.com/notpm/mc/mlog"
+	"github.com/kacifer/mc"
+	"github.com/kacifer/mc/mlog"
 	"github.com/pkg/errors"
 	"net/http"
 )

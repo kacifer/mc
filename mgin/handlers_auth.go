@@ -1,8 +1,8 @@
 package mgin
 
 import (
-	"github.com/notpm/mc"
-	"github.com/notpm/mc/mjwt"
+	"github.com/kacifer/mc"
+	"github.com/kacifer/mc/mjwt"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
